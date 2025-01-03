@@ -1,4 +1,4 @@
-package fr.univpau.queezer
+package fr.univpau.queezer.screen
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column

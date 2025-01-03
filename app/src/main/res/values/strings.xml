@@ -1,3 +1,32 @@
 <resources>
     <string name="app_name">Queezer</string>
+
+    <string name="quick_play">Partie rapide</string>
+    <string name="custom_play">Partie personnalisée</string>
+    <string name="settings">Paramètre</string>
+    <string name="score">Score</string>
+
+    <!-- Settings -->
+    <string name="playlist_url_label">URL de la playlist</string>
+    <string name="playlist_url_hint">https://api.deezer.com/playlist/...</string>
+    <string name="error_playlist_url_empty">L\'URL de la playlist ne peut pas être vide</string>
+    <string name="error_playlist_url_invalid">L\'URL de la playlist est invalide</string>
+
+    <string name="tracks_count_label">Nombre de titres dans une partie</string>
+    <string name="tracks_count_hint">10</string>
+    <string name="error_tracks_count_empty">Le nombre de titres ne peut pas être vide</string>
+    <string name="error_tracks_count_negative">Le nombre de titres doit être supérieur à 0</string>
+
+    <string name="game_mode_label">Mode de jeu</string>
+    <string-array name="game_modes">
+        <item>Titres</item>
+        <item>Artistes</item>
+        <item>Tout</item>
+    </string-array>
+
+    <string name="back">Retour</string>
+    <string name="skip">Passer</string>
+    <string name="give_up">Abandonner</string>
+    <string name="submit">Valider</string>
+
 </resources>
