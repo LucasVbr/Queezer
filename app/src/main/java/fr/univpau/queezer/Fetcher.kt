@@ -26,7 +26,7 @@ data class Album(
 )
 
 
-suspend fun fetchTracks(apiUrl: String): MutableState<List<Track>> {
+suspend fun fetchTracks(apiUrl: String): List<Track>? {
     return withContext(Dispatchers.IO) {
         try {
             val url = URL(apiUrl)
@@ -40,11 +40,11 @@ suspend fun fetchTracks(apiUrl: String): MutableState<List<Track>> {
                 val trackListType = object : TypeToken<List<Track>>() {}.type
                 Gson().fromJson<List<Track>>(tracksJson, trackListType)
             } else {
-                null
+                emptyList()
             }
         } catch (e: Exception) {
             e.printStackTrace()
-            null
+            emptyList()
         }
     }
 }
