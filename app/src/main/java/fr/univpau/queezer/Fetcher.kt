@@ -26,7 +26,7 @@ data class Album(
 )
 
 
-suspend fun fetchTracks(apiUrl: String): List<Track>? {
+suspend fun fetchTracks(apiUrl: String): List<Track> {
     return withContext(Dispatchers.IO) {
         try {
             val url = URL(apiUrl)

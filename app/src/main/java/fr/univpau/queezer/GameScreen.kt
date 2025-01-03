@@ -1,6 +1,8 @@
 package fr.univpau.queezer
 
 import android.os.CountDownTimer
+import android.util.Log
+import android.widget.Toast
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -34,10 +36,20 @@ fun GameScreen(navController: NavHostController) {
     var selectedGameMode by remember { mutableStateOf(loadedSettings.gameMode) }
     val numberOfTitles by remember { mutableIntStateOf(loadedSettings.numberOfTitles.toInt()) }
     val playlistUrl by remember { mutableStateOf(loadedSettings.playlistUrl) }
-    val tracks = remember { mutableStateOf(emptyList<Track>()) }
+    var tracks by remember { mutableStateOf(emptyList<Track>()) }
 
     LaunchedEffect(playlistUrl) {
-        // tracks = fetchTracks(playlistUrl)
+        tracks = fetchTracks(playlistUrl)
+        if (tracks.isEmpty()) {
+            // Affiche un message d'erreur en toast
+            Toast.makeText(context, "Impossible de charger les titres, veuillez vérifier la validité de l'URL.", Toast.LENGTH_SHORT).show()
+
+            // Retourn à l'écran d'accueil
+            navController.popBackStack()
+        }
+
+        tracks = tracks.shuffled() // On mélange les titres
+        Log.i("Tracks", tracks.toString())
     }
 
     val score = remember { mutableIntStateOf(0) }
