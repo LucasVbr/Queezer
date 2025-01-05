@@ -4,7 +4,7 @@ import android.os.CountDownTimer
 
 class CountdownManager (val duration: Long, val onFinish: () -> Unit) {
 
-    var timeLeft = duration;
+    var timeLeft = duration / 1000;
     var interval = 1000L;
     var timer: CountDownTimer? = null
 
