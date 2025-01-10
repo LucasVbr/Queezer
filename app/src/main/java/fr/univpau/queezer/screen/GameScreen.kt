@@ -23,6 +23,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.blur
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.input.KeyboardType
@@ -33,6 +34,7 @@ import fr.univpau.queezer.R
 import fr.univpau.queezer.data.Settings
 import fr.univpau.queezer.manager.loadSettings
 import coil.compose.AsyncImage
+import fr.univpau.queezer.data.Answer
 import fr.univpau.queezer.manager.GameManager
 import fr.univpau.queezer.manager.fetchAndFormatPlaylist
 
@@ -54,7 +56,8 @@ fun GameScreen(navController: NavHostController) {
     }
 
     // État de l'utilisateur et des éléments du jeu
-    val userInput = remember { mutableStateOf("") }
+    val titleInput = remember { mutableStateOf("") }
+    val artistInput = remember { mutableStateOf("") }
 
     // Affichage de l'interface
     Column(
@@ -74,38 +77,67 @@ fun GameScreen(navController: NavHostController) {
             Text("Score : ${gameManager.score}", fontSize = 24.sp)
             Text("Temps restant : ${gameManager.countDownManager.timeLeft}sec", fontSize = 20.sp)
 
-            AsyncImage(
-                model = currentTrack!!.album,
-                contentDescription = "Image from URL",
-                modifier = Modifier
-                    .width(200.dp)
-                    .height(200.dp),
-                contentScale = ContentScale.Crop
-            )
+            if (currentTrack!!.title.answer == Answer.CORRECT && currentTrack!!.artist.answer == Answer.UNKNOWN
+                || currentTrack!!.title.answer == Answer.UNKNOWN && currentTrack!!.artist.answer == Answer.CORRECT
+                || currentTrack!!.title.answer == Answer.CORRECT && currentTrack!!.artist.answer == Answer.CORRECT) {
+                AsyncImage(
+                    model = currentTrack!!.album,
+                    contentDescription = "Image from URL",
+                    modifier = Modifier
+                        .width(200.dp)
+                        .height(200.dp)
+                    ,
+                    contentScale = ContentScale.Crop
+                )
+            } else {
+                AsyncImage(
+                    model = currentTrack!!.album,
+                    contentDescription = "Image from URL",
+                    modifier = Modifier
+                        .width(200.dp)
+                        .height(200.dp)
+                        .blur(50.dp)
+                    ,
+                    contentScale = ContentScale.Crop
+                )
+            }
 
-            Text("Titre : ${currentTrack!!.title.value}", fontSize = 20.sp)
-            Text("Artiste : ${currentTrack!!.artist.value}", fontSize = 20.sp)
-
-            // Champ de texte pour entrer la proposition
-            TextField(
-                value = userInput.value,
-                onValueChange = { userInput.value = it },
-                label = { Text("Titre / Artiste") },
-                keyboardOptions = KeyboardOptions.Default.copy(keyboardType = KeyboardType.Text),
-                modifier = Modifier.fillMaxWidth()
-            )
-
-            // Bouton Valider la réponse
-            Button(
-                onClick = {
-                    userInput.value = "" // Réinitialiser le champ de texte
+            Row {
+                if (currentTrack!!.title.answer == Answer.CORRECT || currentTrack!!.title.answer == Answer.UNKNOWN) {
+                    Text("Titre : ${currentTrack!!.title.value}", fontSize = 20.sp)
+                } else {
+                    TextField(
+                        value = titleInput.value,
+                        onValueChange = {
+                            titleInput.value = it;
+                            gameManager.checkTitleAnswer(currentTrack, titleInput.value)
+                                        },
+                        label = { Text("Titre") },
+                        keyboardOptions = KeyboardOptions.Default.copy(keyboardType = KeyboardType.Text),
+                        modifier = Modifier.fillMaxWidth()
+                    )
                 }
-            ) { Text(context.resources.getString(R.string.submit)) }
+            }
+
+            Row {
+                if (currentTrack!!.artist.answer == Answer.CORRECT || currentTrack!!.artist.answer == Answer.UNKNOWN) {
+                    Text("Artiste : ${currentTrack!!.artist.value}", fontSize = 20.sp)
+                } else {
+                    TextField(
+                        value = artistInput.value,
+                        onValueChange = { artistInput.value = it; gameManager.checkArtistAnswer(currentTrack, artistInput.value) },
+                        label = { Text("Artiste") },
+                        keyboardOptions = KeyboardOptions.Default.copy(keyboardType = KeyboardType.Text),
+                        modifier = Modifier.fillMaxWidth()
+                    )
+                }
+            }
 
             Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
                 Button(
                     onClick = {
-                        userInput.value = "" // Réinitialiser le champ de texte
+                        titleInput.value = ""
+                        artistInput.value = ""
                         gameManager.nextTrack()
                         currentTrack = gameManager.getCurrentTrack()
                     },

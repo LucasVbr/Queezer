@@ -9,7 +9,7 @@ data class Track(
 
 data class Input(
     val value: String,
-    val answer: Answer = Answer.UNKNOWN
+    var answer: Answer = Answer.UNKNOWN
 )
 
 enum class Answer {
