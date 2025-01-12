@@ -2,7 +2,7 @@ package fr.univpau.queezer.manager
 
 import android.os.CountDownTimer
 
-class CountdownManager (val duration: Long, val onFinish: () -> Unit) {
+class CountdownManager (val duration: Long, val onTickTimer: () -> Unit, val onFinishTimer: () -> Unit) {
 
     var timeLeft = duration / 1000;
     var interval = 1000L;
@@ -12,8 +12,11 @@ class CountdownManager (val duration: Long, val onFinish: () -> Unit) {
         timer = object : CountDownTimer(duration, interval) {
             override fun onTick(millisUntilFinished: Long) {
                 timeLeft = millisUntilFinished / 1000;
+                onTickTimer()
             }
-            override fun onFinish() { onFinish() }
+            override fun onFinish() {
+                onFinishTimer()
+            }
         }
     }
 

@@ -6,6 +6,7 @@ import retrofit2.http.GET
 import retrofit2.http.Url
 
 data class PlaylistResponse(
+    val title: String,
     val tracks: TrackList
 )
 

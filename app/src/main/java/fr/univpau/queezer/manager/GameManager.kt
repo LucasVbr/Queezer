@@ -1,29 +1,42 @@
 package fr.univpau.queezer.manager
 
+import android.content.Context
 import android.media.MediaPlayer
 import android.util.Log
 import fr.univpau.queezer.data.Answer
+import fr.univpau.queezer.data.Game
 import fr.univpau.queezer.data.GameMode
+import fr.univpau.queezer.data.Playlist
 import fr.univpau.queezer.data.Settings
 import fr.univpau.queezer.data.Track
+import fr.univpau.queezer.service.DatabaseService
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import java.util.Date
 import java.util.Locale
 
 class GameManager() {
-
+    private lateinit var databaseService: DatabaseService
     private var mediaPlayer: MediaPlayer = MediaPlayer()
-    val countDownManager = CountdownManager(30000L, onFinish = ::nextTrack)
+    var countDownManager = CountdownManager(30000L, {}, {})
 
     var settings: Settings = Settings()
-    var tracks: List<Track> = emptyList()
+    // var tracks: List<Track> = emptyList()
+    var playlist: Playlist = Playlist()
+    var gameFinished : Boolean = false;
 
     var currentTrackIndex: Int = 0;
     var score = 0
 
-    constructor(settings: Settings, tracks: List<Track>) : this() {
+    constructor(settings: Settings, playlist: Playlist, onTick: () -> Unit, databaseService: DatabaseService) : this() {
+        this.databaseService = databaseService
         this.settings = settings
-        this.tracks = tracks
+        this.playlist = playlist
 
-        for (track in tracks) {
+        this.countDownManager = CountdownManager(30000L, onTickTimer = onTick, onFinishTimer = { nextTrack() })
+
+        for (track in playlist.tracks) {
             if (settings.gameMode == GameMode.TITLE) {
                 track.title.answer = Answer.INCORRECT
             }
@@ -74,7 +87,7 @@ class GameManager() {
     fun formatString(input: String): String {
         return input
             .trim()
-            .toLowerCase(Locale.ROOT)
+            .lowercase(Locale.ROOT)
             .removeSurrounding("(", ")")
             .removeSurrounding("[", "]")
             .removeSurrounding("{", "}")
@@ -84,46 +97,65 @@ class GameManager() {
     }
 
     fun getCurrentTrack(): Track? {
-        if (tracks.isEmpty()) return null;
-        return tracks[currentTrackIndex]
+        if (playlist.tracks.isEmpty()) return null;
+        return playlist.tracks[currentTrackIndex]
     }
 
     fun stop() {
         mediaPlayer.release()
-        // countDownManager.stop()
+        countDownManager.stop()
     }
 
     fun nextTrack() {
         mediaPlayer.release()
 
 
-        if (currentTrackIndex >= tracks.size - 1) {
+        if (currentTrackIndex >= playlist.tracks.size - 1) {
             return; // TODO vérifier avant meme de lancer la partie si le nombre de titres est suffisant
         }
 
         if (currentTrackIndex >= settings.numberOfTitles!! - 1) {
+            gameFinished = true
             return;
         }
 
         currentTrackIndex++
 
         mediaPlayer = MediaPlayer().apply {
-            setDataSource(tracks[currentTrackIndex].preview)
+            setDataSource(playlist.tracks[currentTrackIndex].preview)
             prepare()
             start()
         }
 
-        // countDownManager.restart()
+        countDownManager.restart()
     }
 
 
     fun start() {
-        // countDownManager.start()
-        Log.i("GameManager", "Next track: ${tracks[currentTrackIndex].preview}")
+        countDownManager.start()
+        Log.i("GameManager", "Next track: ${playlist.tracks[currentTrackIndex].preview}")
         mediaPlayer = MediaPlayer().apply {
-            setDataSource(tracks[currentTrackIndex].preview)
+            setDataSource(playlist.tracks[currentTrackIndex].preview)
             prepare()
             start()
+        }
+    }
+
+    fun save(context: Context) {
+        // TODO Sauvegarder tout le jeu en base de donnée locale (Room) dans un objet Game
+
+        // Créer un objet Game
+        val game = Game(
+            id = 0,
+            settings = settings,
+            playlist = playlist,
+            score = score,
+            date = Date()
+        )
+
+        // Sauvegarder le jeu avec Room
+        CoroutineScope(Dispatchers.IO).launch {
+            databaseService.gameDao().insert(game)
         }
     }
 }

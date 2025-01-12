@@ -2,6 +2,7 @@ plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
     alias(libs.plugins.kotlin.compose)
+    id("kotlin-kapt")
 }
 
 android {
@@ -39,7 +40,24 @@ android {
     }
 }
 
+apply(
+    plugin = "kotlin-kapt"
+)
+
 dependencies {
+    implementation(libs.androidx.runtime.livedata)
+    val roomVersion = "2.5.2"
+
+
+    //annotationProcessor(libs.androidx.room.compiler)
+    implementation("androidx.room:room-common:${roomVersion}")
+    kapt("androidx.room:room-compiler:${roomVersion}")
+    implementation("androidx.room:room-runtime:${roomVersion}")
+    implementation("androidx.room:room-ktx:${roomVersion}")
+    implementation("androidx.room:room-paging:${roomVersion}")
+    //implementation(libs.androidx.room.ktx)
+
+
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.lifecycle.runtime.ktx)
     implementation(libs.androidx.activity.compose)
@@ -51,7 +69,7 @@ dependencies {
     implementation(libs.androidx.navigation.compose)
     implementation(libs.retrofit)
     implementation(libs.converter.gson)
-    implementation("io.coil-kt:coil-compose:2.4.0")
+    implementation(libs.coil.compose)
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)

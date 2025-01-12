@@ -18,8 +18,10 @@ import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -35,22 +37,25 @@ import fr.univpau.queezer.data.Settings
 import fr.univpau.queezer.manager.loadSettings
 import coil.compose.AsyncImage
 import fr.univpau.queezer.data.Answer
+import fr.univpau.queezer.data.Playlist
 import fr.univpau.queezer.manager.GameManager
-import fr.univpau.queezer.manager.fetchAndFormatPlaylist
+import fr.univpau.queezer.manager.fetchPlaylist
+import fr.univpau.queezer.service.DatabaseService
+import kotlinx.coroutines.launch
 
 @Composable
-fun GameScreen(navController: NavHostController) {
+fun GameScreen(navController: NavHostController, database: DatabaseService) {
+    val coroutineScope = rememberCoroutineScope()
     val context = LocalContext.current
     val settings: Settings = loadSettings(context)
 
-    var gameManager by remember { mutableStateOf(GameManager(settings, emptyList())) }
-    var currentTrack by remember { mutableStateOf(gameManager.getCurrentTrack()) }
+    var gameManager by remember { mutableStateOf(GameManager(settings, Playlist(), {}, database)) }
+    var countdown by remember { mutableIntStateOf(30) }
 
     LaunchedEffect(settings.playlistUrl) {
-        val tracks = fetchAndFormatPlaylist(settings.playlistUrl).shuffled()
-        gameManager = GameManager(settings, tracks)
+        val playlist = fetchPlaylist(settings.playlistUrl)
+        gameManager = GameManager(settings, playlist ?: Playlist(), { countdown = gameManager.countDownManager.timeLeft.toInt() }, database)
 
-        currentTrack = gameManager.getCurrentTrack()
         gameManager.start()
         Log.i("GameScreen", gameManager.getCurrentTrack().toString())
     }
@@ -67,21 +72,32 @@ fun GameScreen(navController: NavHostController) {
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.spacedBy(16.dp)
     ) {
-        if (currentTrack == null) {
+        if (gameManager.getCurrentTrack() == null) {
             CircularProgressIndicator(
                 modifier = Modifier.width(64.dp),
                 color = MaterialTheme.colorScheme.secondary,
                 trackColor = MaterialTheme.colorScheme.surfaceVariant,
             )
+        } else if (gameManager.gameFinished) {
+            Text("Partie terminée !", fontSize = 24.sp)
+            Text("Score : ${gameManager.score}", fontSize = 20.sp)
+            Button(onClick = {
+
+                coroutineScope.launch {
+                    gameManager.save(context)
+                    gameManager.stop()
+                    navController.popBackStack()
+                }
+            }) { Text(context.resources.getString(R.string.back)) }
         } else {
             Text("Score : ${gameManager.score}", fontSize = 24.sp)
-            Text("Temps restant : ${gameManager.countDownManager.timeLeft}sec", fontSize = 20.sp)
+            Text("Temps restant : ${countdown}sec", fontSize = 20.sp)
 
-            if (currentTrack!!.title.answer == Answer.CORRECT && currentTrack!!.artist.answer == Answer.UNKNOWN
-                || currentTrack!!.title.answer == Answer.UNKNOWN && currentTrack!!.artist.answer == Answer.CORRECT
-                || currentTrack!!.title.answer == Answer.CORRECT && currentTrack!!.artist.answer == Answer.CORRECT) {
+            if (gameManager.getCurrentTrack()!!.title.answer == Answer.CORRECT && gameManager.getCurrentTrack()!!.artist.answer == Answer.UNKNOWN
+                || gameManager.getCurrentTrack()!!.title.answer == Answer.UNKNOWN && gameManager.getCurrentTrack()!!.artist.answer == Answer.CORRECT
+                || gameManager.getCurrentTrack()!!.title.answer == Answer.CORRECT && gameManager.getCurrentTrack()!!.artist.answer == Answer.CORRECT) {
                 AsyncImage(
-                    model = currentTrack!!.album,
+                    model = gameManager.getCurrentTrack()!!.album,
                     contentDescription = "Image from URL",
                     modifier = Modifier
                         .width(200.dp)
@@ -91,7 +107,7 @@ fun GameScreen(navController: NavHostController) {
                 )
             } else {
                 AsyncImage(
-                    model = currentTrack!!.album,
+                    model = gameManager.getCurrentTrack()!!.album,
                     contentDescription = "Image from URL",
                     modifier = Modifier
                         .width(200.dp)
@@ -103,14 +119,14 @@ fun GameScreen(navController: NavHostController) {
             }
 
             Row {
-                if (currentTrack!!.title.answer == Answer.CORRECT || currentTrack!!.title.answer == Answer.UNKNOWN) {
-                    Text("Titre : ${currentTrack!!.title.value}", fontSize = 20.sp)
+                if (gameManager.getCurrentTrack()!!.title.answer == Answer.CORRECT || gameManager.getCurrentTrack()!!.title.answer == Answer.UNKNOWN) {
+                    Text("Titre : ${gameManager.getCurrentTrack()!!.title.value}", fontSize = 20.sp)
                 } else {
                     TextField(
                         value = titleInput.value,
                         onValueChange = {
                             titleInput.value = it;
-                            gameManager.checkTitleAnswer(currentTrack, titleInput.value)
+                            gameManager.checkTitleAnswer(gameManager.getCurrentTrack(), titleInput.value)
                                         },
                         label = { Text("Titre") },
                         keyboardOptions = KeyboardOptions.Default.copy(keyboardType = KeyboardType.Text),
@@ -120,12 +136,12 @@ fun GameScreen(navController: NavHostController) {
             }
 
             Row {
-                if (currentTrack!!.artist.answer == Answer.CORRECT || currentTrack!!.artist.answer == Answer.UNKNOWN) {
-                    Text("Artiste : ${currentTrack!!.artist.value}", fontSize = 20.sp)
+                if (gameManager.getCurrentTrack()!!.artist.answer == Answer.CORRECT || gameManager.getCurrentTrack()!!.artist.answer == Answer.UNKNOWN) {
+                    Text("Artiste : ${gameManager.getCurrentTrack()!!.artist.value}", fontSize = 20.sp)
                 } else {
                     TextField(
                         value = artistInput.value,
-                        onValueChange = { artistInput.value = it; gameManager.checkArtistAnswer(currentTrack, artistInput.value) },
+                        onValueChange = { artistInput.value = it; gameManager.checkArtistAnswer(gameManager.getCurrentTrack(), artistInput.value) },
                         label = { Text("Artiste") },
                         keyboardOptions = KeyboardOptions.Default.copy(keyboardType = KeyboardType.Text),
                         modifier = Modifier.fillMaxWidth()
@@ -139,7 +155,6 @@ fun GameScreen(navController: NavHostController) {
                         titleInput.value = ""
                         artistInput.value = ""
                         gameManager.nextTrack()
-                        currentTrack = gameManager.getCurrentTrack()
                     },
                 ) { Text(context.resources.getString(R.string.skip)) }
 

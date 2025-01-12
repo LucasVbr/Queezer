@@ -27,7 +27,6 @@ import fr.univpau.queezer.R
 import fr.univpau.queezer.data.GameMode
 import fr.univpau.queezer.manager.loadSettings
 import fr.univpau.queezer.manager.saveSettings
-import java.net.URL
 
 @Composable
 fun SettingsScreen(navController: NavHostController) {

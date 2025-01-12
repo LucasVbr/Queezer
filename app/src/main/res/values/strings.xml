@@ -29,4 +29,9 @@
     <string name="give_up">Abandonner</string>
     <string name="submit">Valider</string>
 
+    <string name="games_played">Nombre de parties jouées</string>
+    <string name="average_success_rate">Taux de réussite moyen</string>
+    <string name="filters">Filtrer par</string>
+    <string name="date">Date</string>
+
 </resources>
