@@ -1,5 +1,6 @@
 package fr.univpau.queezer.view.screens
 
+import android.util.Log
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -18,6 +19,8 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.livedata.observeAsState
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
@@ -26,7 +29,9 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
 import fr.univpau.queezer.R
+import fr.univpau.queezer.data.Filter
 import fr.univpau.queezer.data.Game
+import fr.univpau.queezer.data.filterGames
 import fr.univpau.queezer.view.components.GameCardItemList
 import fr.univpau.queezer.viewmodel.GameViewModel
 import kotlin.math.max
@@ -35,10 +40,14 @@ import kotlin.math.max
 @Composable
 fun ScoreScreen(navController: NavHostController, gameViewModel: GameViewModel) {
     val context = LocalContext.current
+    val filter = remember { mutableStateOf(Filter()) }
     val games: List<Game> = gameViewModel.games.observeAsState().value ?: emptyList()
 
     val nbGames = games.size;
     val averageSuccessRate = games.sumOf { it.score }.div(max(games.size, 1))
+
+    val filteredGames = filterGames(filter.value, games)
+    Log.i("ScoreScreen", "filteredGames: $filteredGames")
 
     Scaffold(
         topBar = {
@@ -91,7 +100,7 @@ fun ScoreScreen(navController: NavHostController, gameViewModel: GameViewModel) 
 
             // Todo add filters
 
-            GameCardItemList(games)
+            GameCardItemList(filteredGames)
         }
     }
 

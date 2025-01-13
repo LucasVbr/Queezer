@@ -18,7 +18,7 @@ fun GameCardItemList(games: List<Game>) {
             .fillMaxWidth()
             .padding(horizontal = 16.dp)
             .verticalScroll(rememberScrollState()),
-        
+
         verticalArrangement = Arrangement.spacedBy(16.dp),
     ) {
         for (game in games) GameCardItem(game)
