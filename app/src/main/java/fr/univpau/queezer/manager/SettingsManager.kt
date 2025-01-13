@@ -26,7 +26,5 @@ fun loadSettings(context: Context): Settings {
     // Si le JSON n'est pas null, le convertir en objet Settings
     return if (json != null) {
         Gson().fromJson(json, Settings::class.java)
-    } else {
-        Settings()
-    }
+    } else Settings()
 }

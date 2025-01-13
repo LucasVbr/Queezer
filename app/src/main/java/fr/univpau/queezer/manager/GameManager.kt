@@ -32,7 +32,7 @@ class GameManager() {
     constructor(settings: Settings, playlist: Playlist, onTick: () -> Unit, databaseService: DatabaseService) : this() {
         this.databaseService = databaseService
         this.settings = settings
-        this.playlist = playlist
+        this.playlist = Playlist(playlist.title, playlist.tracks.subList(0, settings.numberOfTitles!!))
 
         this.countDownManager = CountdownManager(30000L, onTickTimer = onTick, onFinishTimer = { nextTrack() })
 
@@ -109,12 +109,7 @@ class GameManager() {
     fun nextTrack() {
         mediaPlayer.release()
 
-
-        if (currentTrackIndex >= playlist.tracks.size - 1) {
-            return; // TODO vérifier avant meme de lancer la partie si le nombre de titres est suffisant
-        }
-
-        if (currentTrackIndex >= settings.numberOfTitles!! - 1) {
+        if (currentTrackIndex + 1 >= playlist.tracks.size) {
             gameFinished = true
             return;
         }

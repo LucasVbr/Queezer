@@ -1,4 +1,4 @@
-package fr.univpau.queezer.screen
+package fr.univpau.queezer.view.screens
 
 import android.util.Log
 import androidx.compose.foundation.layout.Arrangement
@@ -49,7 +49,7 @@ fun GameScreen(navController: NavHostController, database: DatabaseService) {
     val context = LocalContext.current
     val settings: Settings = loadSettings(context)
 
-    var gameManager by remember { mutableStateOf(GameManager(settings, Playlist(), {}, database)) }
+    var gameManager by remember { mutableStateOf(GameManager()) }
     var countdown by remember { mutableIntStateOf(30) }
 
     LaunchedEffect(settings.playlistUrl) {

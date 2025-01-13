@@ -1,0 +1,21 @@
+package fr.univpau.queezer.view.components
+
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
+import androidx.compose.runtime.Composable
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.unit.dp
+import fr.univpau.queezer.data.Game
+import fr.univpau.queezer.data.Track
+
+@Composable
+fun TrackCardItemList(tracks: List<Track>) {
+    Column(
+        modifier = Modifier.fillMaxWidth(),
+        verticalArrangement = Arrangement.spacedBy(16.dp)
+    ) {
+        for (track in tracks) TrackCardItem(track)
+    }
+}

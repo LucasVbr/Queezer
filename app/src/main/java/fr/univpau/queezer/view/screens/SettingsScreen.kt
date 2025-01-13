@@ -1,4 +1,4 @@
-package fr.univpau.queezer.screen
+package fr.univpau.queezer.view.screens
 
 import android.widget.Toast
 import androidx.compose.foundation.layout.Arrangement
