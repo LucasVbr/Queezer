@@ -46,6 +46,7 @@ apply(
 
 dependencies {
     implementation(libs.androidx.runtime.livedata)
+    implementation(libs.material)
     val roomVersion = "2.5.2"
 
 

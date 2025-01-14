@@ -82,6 +82,9 @@ fun SettingsScreen(navController: NavHostController, saveLocation: String = "set
                             settings.value.validate(context)
                             saveSettings(context, settings.value, saveLocation)
                             navController.popBackStack()
+                            if (saveLocation != "settings") {
+                                navController.navigate("custom_game")
+                            }
                         } catch (e: Exception) {
                             Toast.makeText(context, e.message, Toast.LENGTH_LONG).show()
                         }

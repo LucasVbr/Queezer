@@ -1,10 +1,13 @@
 package fr.univpau.queezer.view.components
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.material3.Badge
+import androidx.compose.material3.BadgedBox
 import androidx.compose.material3.Card
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
@@ -15,9 +18,11 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import fr.univpau.queezer.R
 import fr.univpau.queezer.data.Game
 import fr.univpau.queezer.data.GameMode
 import java.text.SimpleDateFormat
@@ -26,7 +31,8 @@ import java.util.Locale
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun GameCardItem(game: Game) {
-    val formatter = SimpleDateFormat("dd MMMM yyyy", Locale.getDefault())
+    val context = LocalContext.current
+    val formatter = SimpleDateFormat("dd MMMM yyyy - HH:mm", Locale.getDefault())
     val showBottomSheet = remember { mutableStateOf(false) }
     val coroutineScope = rememberCoroutineScope()
 
@@ -36,6 +42,8 @@ fun GameCardItem(game: Game) {
         (game.settings.numberOfTitles ?: 1)
     }
 
+    val gameModesLabels = context.resources.getStringArray(R.array.game_modes)
+
     Card(
         onClick = { showBottomSheet.value = true },
         modifier = Modifier.fillMaxWidth()
@@ -43,14 +51,29 @@ fun GameCardItem(game: Game) {
         Column(
             modifier = Modifier.padding(16.dp)
         ) {
-            Text(
-                text = game.playlist.title,
-                fontSize = 14.sp,
-                fontWeight = FontWeight.SemiBold
-            )
-            Text(text = formatter.format(game.date))
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween
+            ) {
+                Text(
+                    text = game.playlist.title,
+                    fontSize = 14.sp,
+                    fontWeight = FontWeight.SemiBold
+                )
 
-            Text(text = "${game.score}/$maxScore")
+                Badge(
+                    containerColor = MaterialTheme.colorScheme.primary,
+                    content = { Text("${game.score}/${maxScore}") }
+                )
+            }
+
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween
+            ) {
+                Text(text = formatter.format(game.date))
+                Text(text = "Mode: ${gameModesLabels[game.settings.gameMode.ordinal]}")
+            }
         }
     }
 
@@ -76,14 +99,24 @@ fun GameCardItem(game: Game) {
                         text = game.playlist.title,
                         style = MaterialTheme.typography.titleMedium
                     )
-                    Text(
-                        text = "${game.score}/$maxScore",
-                        style = MaterialTheme.typography.titleMedium
+                    Badge(
+                        containerColor = MaterialTheme.colorScheme.primary,
+                        content = {
+                            Text(
+                                text = "${game.score}/${maxScore}pts",
+                                style = MaterialTheme.typography.titleMedium
+                            )
+                        }
                     )
                 }
-                Text(
-                    text = formatter.format(game.date),
-                )
+
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween
+                ) {
+                    Text(formatter.format(game.date))
+                    Text("Mode: ${gameModesLabels[game.settings.gameMode.ordinal]}")
+                }
 
                 TrackCardItemList(game.playlist.tracks)
             }

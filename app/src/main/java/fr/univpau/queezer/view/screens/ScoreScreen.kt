@@ -3,13 +3,21 @@ package fr.univpau.queezer.view.screens
 import android.util.Log
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ExperimentalLayoutApi
+import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.filled.Check
+import androidx.compose.material.icons.filled.KeyboardArrowDown
+import androidx.compose.material.icons.filled.KeyboardArrowUp
 import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.FilterChip
+import androidx.compose.material3.FilterChipDefaults
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -18,9 +26,12 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.derivedStateOf
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
@@ -31,22 +42,23 @@ import androidx.navigation.NavHostController
 import fr.univpau.queezer.R
 import fr.univpau.queezer.data.Filter
 import fr.univpau.queezer.data.Game
+import fr.univpau.queezer.data.GameMode
 import fr.univpau.queezer.data.filterGames
 import fr.univpau.queezer.view.components.GameCardItemList
 import fr.univpau.queezer.viewmodel.GameViewModel
-import kotlin.math.max
+import java.util.Locale
+import kotlin.math.round
 
-@OptIn(ExperimentalMaterial3Api::class)
+@OptIn(ExperimentalMaterial3Api::class, ExperimentalLayoutApi::class)
 @Composable
 fun ScoreScreen(navController: NavHostController, gameViewModel: GameViewModel) {
     val context = LocalContext.current
-    val filter = remember { mutableStateOf(Filter()) }
+    var filter by remember { mutableStateOf(Filter()) }
     val games: List<Game> = gameViewModel.games.observeAsState().value ?: emptyList()
 
-    val nbGames = games.size;
-    val averageSuccessRate = games.sumOf { it.score }.div(max(games.size, 1))
-
-    val filteredGames = filterGames(filter.value, games)
+    val filteredGames by remember(filter, games) { derivedStateOf { filterGames(filter, games) } }
+    val averageSuccessRate by remember(filteredGames) { derivedStateOf { calculateAverageSuccessRate(filteredGames) } }
+    val nbGames by remember(filteredGames) { derivedStateOf { filteredGames.size } }
 
     Scaffold(
         topBar = {
@@ -89,7 +101,7 @@ fun ScoreScreen(navController: NavHostController, gameViewModel: GameViewModel) 
                     Text(text = "Parties jouées", fontSize = 14.sp)
                 }
                 Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                    Text(text = "$averageSuccessRate%", fontSize = 24.sp, fontWeight = androidx.compose.ui.text.font.FontWeight.Bold)
+                    Text(text = "${String.format(Locale.getDefault(), "%.02f", averageSuccessRate)}%", fontSize = 24.sp, fontWeight = androidx.compose.ui.text.font.FontWeight.Bold)
                     Text(text = "De réussite", fontSize = 14.sp)
                 }
             }
@@ -97,6 +109,89 @@ fun ScoreScreen(navController: NavHostController, gameViewModel: GameViewModel) 
             HorizontalDivider()
 
             // Todo add filters
+
+            FlowRow(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 16.dp),
+                horizontalArrangement = Arrangement.spacedBy(8.dp),
+            ) {
+                FilterChip(
+                    selected = true,
+                    onClick = {
+                        // Inverser l'ordre de tri
+                        filter = filter.copy(dateOrderIsAscending = !filter.dateOrderIsAscending)
+                    },
+                    label = { Text("Date") },
+                    leadingIcon = {
+                        if (filter.dateOrderIsAscending) {
+                            Icon(
+                                imageVector = Icons.Filled.KeyboardArrowUp,
+                                contentDescription = "Tri Ascendant",
+                                modifier = Modifier.size(FilterChipDefaults.IconSize)
+                            )
+                        } else {
+                            Icon(
+                                imageVector = Icons.Filled.KeyboardArrowDown,
+                                contentDescription = "Tri Descendant",
+                                modifier = Modifier.size(FilterChipDefaults.IconSize)
+                            )
+                        }
+                    },
+                )
+
+                val gameModesLabels = context.resources.getStringArray(R.array.game_modes)
+                filter.mode.entries.forEachIndexed { index, entry ->
+                    FilterChip(
+                        selected = entry.value,
+                        onClick = {
+                            filter = filter.copy(mode = filter.mode.toMutableMap().apply {
+                                this[entry.key] = !entry.value
+                            })
+                        },
+
+                        leadingIcon = {
+                            if (entry.value) {
+                                Icon(
+                                    imageVector = Icons.Filled.Check,
+                                    contentDescription = "Filtre activé",
+                                    modifier = Modifier.size(FilterChipDefaults.IconSize)
+                                )
+                            }
+                        },
+
+                        label = { Text(
+                            gameModesLabels[index],
+                            maxLines = 1,
+                        ) },
+                    )
+                }
+
+                // Filtrer par nombre de titres
+                FilterChip(
+                    selected = true,
+                    onClick = {
+                        // Inverser l'ordre de tri
+                        filter = filter.copy(nbTitleIsAscending = !filter.nbTitleIsAscending)
+                    },
+                    label = { Text("Nombre de titres") },
+                    leadingIcon = {
+                        if (filter.nbTitleIsAscending) {
+                            Icon(
+                                imageVector = Icons.Filled.KeyboardArrowUp,
+                                contentDescription = "Tri Ascendant",
+                                modifier = Modifier.size(FilterChipDefaults.IconSize)
+                            )
+                        } else {
+                            Icon(
+                                imageVector = Icons.Filled.KeyboardArrowDown,
+                                contentDescription = "Tri Descendant",
+                                modifier = Modifier.size(FilterChipDefaults.IconSize)
+                            )
+                        }
+                    },
+                )
+            }
 
             if (filteredGames.isEmpty()) {
                 Column (
@@ -110,4 +205,18 @@ fun ScoreScreen(navController: NavHostController, gameViewModel: GameViewModel) 
             }
         }
     }
+}
+
+fun calculateAverageSuccessRate(games: List<Game>): Double {
+    if (games.isEmpty()) return 0.0
+
+    val averageGameScore = games.sumOf {
+        if (it.settings.gameMode == GameMode.ALL) {
+            it.score.toDouble() / (it.settings.numberOfTitles!! * 2)
+        } else {
+            it.score.toDouble() / (it.settings.numberOfTitles ?: 1)
+        }
+    }
+
+    return (averageGameScore / games.size) * 100
 }
