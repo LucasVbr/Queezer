@@ -47,7 +47,6 @@ fun ScoreScreen(navController: NavHostController, gameViewModel: GameViewModel) 
     val averageSuccessRate = games.sumOf { it.score }.div(max(games.size, 1))
 
     val filteredGames = filterGames(filter.value, games)
-    Log.i("ScoreScreen", "filteredGames: $filteredGames")
 
     Scaffold(
         topBar = {
@@ -79,7 +78,6 @@ fun ScoreScreen(navController: NavHostController, gameViewModel: GameViewModel) 
                 .padding(innerPadding),
             verticalArrangement = Arrangement.spacedBy(16.dp),
         ) {
-
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -100,146 +98,16 @@ fun ScoreScreen(navController: NavHostController, gameViewModel: GameViewModel) 
 
             // Todo add filters
 
-            GameCardItemList(filteredGames)
+            if (filteredGames.isEmpty()) {
+                Column (
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalAlignment = Alignment.CenterHorizontally
+                ) {
+                    Text(text = "Aucune partie trouvée... (｡•́︿•̀｡)", fontSize = 16.sp, color = MaterialTheme.colorScheme.onSurface)
+                }
+            } else {
+                GameCardItemList(filteredGames)
+            }
         }
     }
-
-//    Column(
-//        modifier = Modifier
-//            .fillMaxSize()
-//            .padding(16.dp),
-//        horizontalAlignment = Alignment.CenterHorizontally,
-//        verticalArrangement = Arrangement.spacedBy(16.dp)
-//    ) {
-//        // Titre des paramètres
-//        Text(
-//            text = context.resources.getString(R.string.score),
-//            fontSize = 32.sp,
-//            modifier = Modifier.padding(bottom = 32.dp)
-//        )
-//
-//        //  Nombre de parties jouées
-//        Row(
-//            modifier = Modifier.fillMaxWidth(),
-//            horizontalArrangement = Arrangement.SpaceBetween
-//        ) {
-//            Text(
-//                text = context.resources.getString(R.string.games_played),
-//                fontSize = 24.sp,
-//            )
-//            if (gameList?.isNotEmpty() == true) {
-//                Text(
-//                    text = gameList.size.toString(),
-//                    fontSize = 24.sp,
-//                )
-//            } else {
-//                Text(
-//                    text = "0",
-//                    fontSize = 24.sp,
-//                )
-//            }
-//
-//        }
-//
-//        // pourcentage de réussite moyen
-//        Row(
-//            modifier = Modifier.fillMaxWidth(),
-//            horizontalArrangement = Arrangement.SpaceBetween
-//        ) {
-//            Text(
-//                text = context.resources.getString(R.string.average_success_rate),
-//                fontSize = 24.sp,
-//            )
-//            if (gameList?.isNotEmpty() == true) {
-//                Text(
-//                    text = (gameList.sumOf { it.score }.div(gameList.size).toString()) + "%",
-//                    fontSize = 24.sp,
-//                )
-//            } else {
-//                Text(
-//                    text = "0%",
-//                    fontSize = 24.sp,
-//                )
-//            }
-//        }
-
-    // filtres
-    // - date
-    // - mode de jeu –titre/artiste/les deux
-    // - nombre de titres
-//        Row(
-//            modifier = Modifier.fillMaxWidth(),
-//            horizontalArrangement = Arrangement.SpaceBetween
-//        ) {
-//            Text(
-//                text = context.resources.getString(R.string.filters),
-//                fontSize = 24.sp,
-//            )
-//
-//            Row(
-//                horizontalArrangement = Arrangement.SpaceBetween
-//            ){
-//                Button(
-//                    onClick = { /* TODO: Filtre par date */ },
-//                    shape = RoundedCornerShape(8.dp),
-//                    modifier = Modifier
-//                        .padding(vertical = 8.dp)
-//                ) {
-//                    Text(context.resources.getString(R.string.date))
-//                }
-//
-//                Button(
-//                    onClick = { /* TODO: Filtre par date */ },
-//                    shape = RoundedCornerShape(8.dp),
-//                    modifier = Modifier
-//                        .padding(vertical = 8.dp)
-//                ) {
-//                    Text("Mode de jeu")
-//                }
-//
-//                Button(
-//                    onClick = { /* TODO: Filtre par date */ },
-//                    shape = RoundedCornerShape(8.dp),
-//                    modifier = Modifier
-//                        .padding(vertical = 8.dp)
-//                ) {
-//                    Text("Nombre de titres")
-//                }
-//            }
-//        }
-
-    // Historique des parties (score, nom)
-    // - cliquer sur une partie pour voir les détails
-
-//        gameList?.forEach {
-//            Row(
-//                modifier = Modifier.fillMaxWidth(),
-//                horizontalArrangement = Arrangement.SpaceBetween
-//            ) {
-//                Text(
-//                    text = it.playlist.title,
-//                    fontSize = 24.sp,
-//                )
-//                Text(
-//                    text = it.score.toString(),
-//                    fontSize = 24.sp,
-//                )
-//            }
-//        }
-
-//        if (gameList !== null) {
-//            GameList(gameList)
-//        }
-//
-//        Button(
-//            onClick = { navController.navigate("home") },
-//            shape = RoundedCornerShape(8.dp),
-//            modifier = Modifier
-//                .fillMaxWidth()
-//                .padding(vertical = 8.dp)
-//        ) {
-//            Text(context.resources.getString(R.string.back))
-//        }
-
-    //}
 }

@@ -25,7 +25,7 @@
     </string-array>
 
     <string name="back">Retour</string>
-    <string name="skip">Passer</string>
+    <string name="next">Suivant</string>
     <string name="give_up">Abandonner</string>
     <string name="submit">Valider</string>
 
@@ -33,5 +33,7 @@
     <string name="average_success_rate">Taux de réussite moyen</string>
     <string name="filters">Filtrer par</string>
     <string name="date">Date</string>
+    <string name="error_playlist_not_found">La playlist n\'as pas été trouvée</string>
+    <string name="error_tracks_count_too_high">Le nombre de titres et trop grand</string>
 
 </resources>

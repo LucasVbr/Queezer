@@ -7,6 +7,7 @@ data class Settings(
     var numberOfTitles: Int? = 5,
     var playlistUrl: String = "https://api.deezer.com/playlist/13279914183",
 ) {
+
     fun validate(context: android.content.Context) {
         if (playlistUrl.isEmpty()) {
             throw IllegalArgumentException(context.resources.getString(R.string.error_playlist_url_empty))

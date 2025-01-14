@@ -1,21 +1,25 @@
-package fr.univpau.queezer.manager
+package fr.univpau.queezer.viewmodel
 
+import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
 import fr.univpau.queezer.data.Input
 import fr.univpau.queezer.data.Playlist
 import fr.univpau.queezer.data.Track
 import fr.univpau.queezer.service.PlaylistResponse
 import fr.univpau.queezer.service.createDeezerApiService
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.withContext
+import kotlinx.coroutines.launch
 
-suspend fun fetchPlaylist(apiUrl: String) : Playlist? {
-    val deezerApiService = createDeezerApiService()
+class PlaylistViewModel(private val url: String) : ViewModel() {
 
-    return withContext(Dispatchers.IO) {
-        try {
-            val playlistResponse : PlaylistResponse = deezerApiService.getPlaylist(apiUrl)
+    var playlist: Playlist? = null
 
-            Playlist(
+    init {
+        val deezerApiService = createDeezerApiService()
+
+        viewModelScope.launch {
+            val playlistResponse : PlaylistResponse = deezerApiService.getPlaylist(url)
+
+            playlist = Playlist(
                 title = playlistResponse.title,
                 tracks = playlistResponse.tracks.data.map { track ->
                     Track(
@@ -26,9 +30,6 @@ suspend fun fetchPlaylist(apiUrl: String) : Playlist? {
                     )
                 }.shuffled()
             )
-        } catch (e: Exception) {
-            e.printStackTrace()
-            null;
         }
     }
 }

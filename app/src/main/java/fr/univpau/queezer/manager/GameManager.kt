@@ -3,6 +3,10 @@ package fr.univpau.queezer.manager
 import android.content.Context
 import android.media.MediaPlayer
 import android.util.Log
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.setValue
 import fr.univpau.queezer.data.Answer
 import fr.univpau.queezer.data.Game
 import fr.univpau.queezer.data.GameMode
@@ -18,23 +22,23 @@ import java.util.Locale
 
 class GameManager() {
     private lateinit var databaseService: DatabaseService
+
     private var mediaPlayer: MediaPlayer = MediaPlayer()
     var countDownManager = CountdownManager(30000L, {}, {})
 
     var settings: Settings = Settings()
-    // var tracks: List<Track> = emptyList()
     var playlist: Playlist = Playlist()
-    var gameFinished : Boolean = false;
 
-    var currentTrackIndex: Int = 0;
-    var score = 0
+    var gameFinished by mutableStateOf(false)
+    var currentTrackIndex by mutableIntStateOf(0)
+    var score by mutableIntStateOf(0)
 
-    constructor(settings: Settings, playlist: Playlist, onTick: () -> Unit, databaseService: DatabaseService) : this() {
-        this.databaseService = databaseService
+    constructor(settings: Settings, playlist: Playlist, onTickTrack: () -> Unit, onFinishTrack: () -> Unit, databaseService: DatabaseService) : this() {
         this.settings = settings
+        this.databaseService = databaseService
         this.playlist = Playlist(playlist.title, playlist.tracks.subList(0, settings.numberOfTitles!!))
 
-        this.countDownManager = CountdownManager(30000L, onTickTimer = onTick, onFinishTimer = { nextTrack() })
+        this.countDownManager = CountdownManager(duration = 30000L, onTickTimer = onTickTrack, onFinishTimer = { onFinishTrack() })
 
         for (track in playlist.tracks) {
             if (settings.gameMode == GameMode.TITLE) {
@@ -53,11 +57,8 @@ class GameManager() {
     fun checkTitleAnswer(currentTrack: Track?, answerTitle: String) {
         if (currentTrack == null) return;
 
-        Log.i("GameManager", "Current track: ${currentTrack.title.value}")
-        Log.i("GameManager", "Answer: $answerTitle")
-
-        var simpleTitleAnswer = formatString(answerTitle)
-        var simpleTitle = formatString(currentTrack.title.value)
+        val simpleTitleAnswer = formatString(answerTitle)
+        val simpleTitle = formatString(currentTrack.title.value)
 
         if (simpleTitle.equals(simpleTitleAnswer, ignoreCase = true)) {
             currentTrack.title.answer = Answer.CORRECT
@@ -70,11 +71,8 @@ class GameManager() {
     fun checkArtistAnswer(currentTrack: Track?, answerArtist: String) {
         if (currentTrack == null) return;
 
-        Log.i("GameManager", "Current track: ${currentTrack.artist.value}")
-        Log.i("GameManager", "Answer: $answerArtist")
-
-        var simpleArtistAnswer = formatString(answerArtist)
-        var simpleArtist = formatString(currentTrack.artist.value)
+        val simpleArtistAnswer = formatString(answerArtist)
+        val simpleArtist = formatString(currentTrack.artist.value)
 
         if (simpleArtist.equals(simpleArtistAnswer, ignoreCase = true)) {
             currentTrack.artist.answer = Answer.CORRECT
@@ -84,7 +82,7 @@ class GameManager() {
         }
     }
 
-    fun formatString(input: String): String {
+    private fun formatString(input: String): String {
         return input
             .trim()
             .lowercase(Locale.ROOT)
@@ -109,8 +107,11 @@ class GameManager() {
     fun nextTrack() {
         mediaPlayer.release()
 
+        Log.i("GameManager", "Current track index: $currentTrackIndex")
+        Log.i("GameManager", "Playlist size: ${playlist.tracks.size}")
+
         if (currentTrackIndex + 1 >= playlist.tracks.size) {
-            gameFinished = true
+            this.gameFinished = true
             return;
         }
 
@@ -128,7 +129,6 @@ class GameManager() {
 
     fun start() {
         countDownManager.start()
-        Log.i("GameManager", "Next track: ${playlist.tracks[currentTrackIndex].preview}")
         mediaPlayer = MediaPlayer().apply {
             setDataSource(playlist.tracks[currentTrackIndex].preview)
             prepare()
@@ -137,8 +137,6 @@ class GameManager() {
     }
 
     fun save(context: Context) {
-        // TODO Sauvegarder tout le jeu en base de donnée locale (Room) dans un objet Game
-
         // Créer un objet Game
         val game = Game(
             id = 0,
@@ -152,5 +150,10 @@ class GameManager() {
         CoroutineScope(Dispatchers.IO).launch {
             databaseService.gameDao().insert(game)
         }
+    }
+
+    fun pause() {
+        mediaPlayer.pause()
+        countDownManager.stop()
     }
 }

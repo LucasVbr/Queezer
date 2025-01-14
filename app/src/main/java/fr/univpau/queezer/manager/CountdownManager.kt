@@ -1,5 +1,6 @@
 package fr.univpau.queezer.manager
 
+import android.content.Context
 import android.os.CountDownTimer
 
 class CountdownManager (val duration: Long, val onTickTimer: () -> Unit, val onFinishTimer: () -> Unit) {
