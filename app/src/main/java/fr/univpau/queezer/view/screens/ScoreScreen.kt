@@ -1,6 +1,5 @@
 package fr.univpau.queezer.view.screens
 
-import android.util.Log
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
@@ -12,8 +11,6 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Check
-import androidx.compose.material.icons.filled.KeyboardArrowDown
-import androidx.compose.material.icons.filled.KeyboardArrowUp
 import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FilterChip
@@ -48,7 +45,6 @@ import fr.univpau.queezer.data.filterGames
 import fr.univpau.queezer.view.components.GameCardItemList
 import fr.univpau.queezer.viewmodel.GameViewModel
 import java.util.Locale
-import java.util.concurrent.Flow
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalLayoutApi::class)
 @Composable
@@ -98,11 +94,11 @@ fun ScoreScreen(navController: NavHostController, gameViewModel: GameViewModel) 
             ) {
                 Column(horizontalAlignment = Alignment.CenterHorizontally) {
                     Text(text = "$nbGames", fontSize = 24.sp, fontWeight = androidx.compose.ui.text.font.FontWeight.Bold)
-                    Text(text = "Parties jouées", fontSize = 14.sp)
+                    Text(text = context.resources.getString(R.string.games_played), fontSize = 14.sp)
                 }
                 Column(horizontalAlignment = Alignment.CenterHorizontally) {
                     Text(text = "${String.format(Locale.getDefault(), "%.02f", averageSuccessRate)}%", fontSize = 24.sp, fontWeight = androidx.compose.ui.text.font.FontWeight.Bold)
-                    Text(text = "De réussite", fontSize = 14.sp)
+                    Text(text = context.resources.getString(R.string.average_success_rate), fontSize = 14.sp)
                 }
             }
 
@@ -117,7 +113,7 @@ fun ScoreScreen(navController: NavHostController, gameViewModel: GameViewModel) 
                     modifier = Modifier.fillMaxWidth(),
                     verticalArrangement = Arrangement.spacedBy(4.dp),
                 ) {
-                    Text("Mode de jeu", fontSize = 16.sp)
+                    Text(context.resources.getString(R.string.game_mode_label), fontSize = 16.sp)
                     FlowRow(
                         modifier = Modifier.fillMaxWidth(),
                         horizontalArrangement = Arrangement.spacedBy(8.dp),
@@ -155,13 +151,13 @@ fun ScoreScreen(navController: NavHostController, gameViewModel: GameViewModel) 
                     modifier = Modifier.fillMaxWidth(),
                     verticalArrangement = Arrangement.spacedBy(4.dp),
                 ) {
-                    Text("Filtrer par", fontSize = 16.sp)
+                    Text(context.resources.getString(R.string.filter_by), fontSize = 16.sp)
                     Row(
                         modifier = Modifier.fillMaxWidth(),
                         horizontalArrangement = Arrangement.spacedBy(8.dp),
                         verticalAlignment = Alignment.CenterVertically
                     ) {
-                        Text("Date")
+                        Text(context.resources.getString(R.string.date), fontSize = 14.sp)
 
                         Switch(
                             checked = filter.orderByNbTitle,
@@ -170,7 +166,7 @@ fun ScoreScreen(navController: NavHostController, gameViewModel: GameViewModel) 
                             }
                         )
 
-                        Text("Nombre de titres")
+                        Text(context.resources.getString(R.string.title_count), fontSize = 14.sp)
                     }
                 }
             }
@@ -180,7 +176,7 @@ fun ScoreScreen(navController: NavHostController, gameViewModel: GameViewModel) 
                     modifier = Modifier.fillMaxWidth(),
                     horizontalAlignment = Alignment.CenterHorizontally
                 ) {
-                    Text(text = "Aucune partie trouvée... (｡•́︿•̀｡)", fontSize = 16.sp, color = MaterialTheme.colorScheme.onSurface)
+                    Text(text = context.resources.getString(R.string.games_not_found), fontSize = 16.sp, color = MaterialTheme.colorScheme.onSurface)
                 }
             } else {
                 GameCardItemList(filteredGames)

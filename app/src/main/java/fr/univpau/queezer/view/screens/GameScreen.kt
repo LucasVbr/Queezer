@@ -286,8 +286,9 @@ fun FinishScreen(gameManager: GameManager, context: Context, navController: NavH
                     .fillMaxWidth()
                     .padding(16.dp),
                 horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.spacedBy(16.dp)
             ){
-                Text("Partie terminée !", fontSize = 24.sp)
+                Text( context.resources.getString(R.string.party_end), fontSize = 24.sp)
                 Text("Score : ${gameManager.score}", fontSize = 20.sp)
 
                 TrackCardItemList(gameManager.playlist.tracks)

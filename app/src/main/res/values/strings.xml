@@ -3,8 +3,8 @@
 
     <string name="quick_play">Partie rapide</string>
     <string name="custom_play">Partie personnalisée</string>
-    <string name="settings">Paramètre</string>
-    <string name="score">Score</string>
+    <string name="settings">Paramètres</string>
+    <string name="score">Scores</string>
 
     <!-- Settings -->
     <string name="playlist_url_label">URL de la playlist</string>
@@ -29,12 +29,18 @@
     <string name="give_up">Abandonner</string>
     <string name="submit">Valider</string>
 
-    <string name="games_played">Nombre de parties jouées</string>
-    <string name="average_success_rate">Taux de réussite moyen</string>
-    <string name="filters">Filtrer par</string>
+    <string name="games_played">Partie jouées</string>
+    <string name="average_success_rate">De réussite</string>
+    <string name="filter_by">Filtrer par</string>
     <string name="date">Date</string>
+    <string name="title_count">Nombre de titres</string>
     <string name="error_playlist_not_found">La playlist n\'as pas été trouvée</string>
     <string name="error_tracks_count_too_high">Le nombre de titres et trop grand</string>
     <string name="playlist_too_short">La playlist est trop petite pour le nombre de titres demandés</string>
+    <string name="games_not_found">Aucune partie trouvée... (｡•́︿•̀｡)</string>
+
+    <string name="party_end">Partie terminée !</string>
+
+
 
 </resources>

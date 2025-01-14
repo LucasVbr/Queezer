@@ -16,6 +16,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -26,6 +27,8 @@ import fr.univpau.queezer.ui.theme.Purple40
 
 @Composable
 fun HomeScreen(navController: NavHostController) {
+    val context = LocalContext.current;
+
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -42,7 +45,7 @@ fun HomeScreen(navController: NavHostController) {
         )
 
         Text(
-            text = "Queezer",
+            text = context.resources.getString(R.string.app_name),
             fontSize = 32.sp,
             fontWeight = FontWeight.Bold,
             color = Purple40
@@ -59,7 +62,7 @@ fun HomeScreen(navController: NavHostController) {
                 .padding(vertical = 8.dp)
         ) {
             Text(
-                "Partie rapide",
+                context.resources.getString(R.string.quick_play),
                 fontSize = 18.sp
             )
         }
@@ -73,7 +76,7 @@ fun HomeScreen(navController: NavHostController) {
                 .fillMaxWidth()
                 .padding(vertical = 8.dp)
         ) {
-            Text("Partie personnalisée", fontSize = 18.sp)
+            Text(context.resources.getString(R.string.custom_play), fontSize = 18.sp)
         }
 
         Button(
@@ -83,7 +86,7 @@ fun HomeScreen(navController: NavHostController) {
                 .fillMaxWidth()
                 .padding(vertical = 8.dp)
         ) {
-            Text("Paramètres", fontSize = 18.sp)
+            Text( context.resources.getString(R.string.settings), fontSize = 18.sp)
         }
 
         Button(
@@ -92,7 +95,7 @@ fun HomeScreen(navController: NavHostController) {
             modifier = Modifier
                 .fillMaxWidth()
         ) {
-            Text("Scores", fontSize = 18.sp)
+            Text(context.resources.getString(R.string.score), fontSize = 18.sp)
         }
     }
 }
