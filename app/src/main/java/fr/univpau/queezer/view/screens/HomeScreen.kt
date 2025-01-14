@@ -58,7 +58,10 @@ fun HomeScreen(navController: NavHostController) {
                 .fillMaxWidth()
                 .padding(vertical = 8.dp)
         ) {
-            Text("Partie rapide")
+            Text(
+                "Partie rapide",
+                fontSize = 18.sp
+            )
         }
 
         Button(
@@ -70,7 +73,7 @@ fun HomeScreen(navController: NavHostController) {
                 .fillMaxWidth()
                 .padding(vertical = 8.dp)
         ) {
-            Text("Partie personnalisée")
+            Text("Partie personnalisée", fontSize = 18.sp)
         }
 
         Button(
@@ -80,7 +83,7 @@ fun HomeScreen(navController: NavHostController) {
                 .fillMaxWidth()
                 .padding(vertical = 8.dp)
         ) {
-            Text("Paramètres")
+            Text("Paramètres", fontSize = 18.sp)
         }
 
         Button(
@@ -88,9 +91,8 @@ fun HomeScreen(navController: NavHostController) {
             shape = RoundedCornerShape(8.dp),
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(vertical = 8.dp)
         ) {
-            Text("Scores")
+            Text("Scores", fontSize = 18.sp)
         }
     }
 }

@@ -23,6 +23,7 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
@@ -47,7 +48,7 @@ import fr.univpau.queezer.data.filterGames
 import fr.univpau.queezer.view.components.GameCardItemList
 import fr.univpau.queezer.viewmodel.GameViewModel
 import java.util.Locale
-import kotlin.math.round
+import java.util.concurrent.Flow
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalLayoutApi::class)
 @Composable
@@ -86,8 +87,7 @@ fun ScoreScreen(navController: NavHostController, gameViewModel: GameViewModel) 
         },
     ) { innerPadding ->
         Column(
-            modifier = Modifier
-                .padding(innerPadding),
+            modifier = Modifier.padding(innerPadding),
             verticalArrangement = Arrangement.spacedBy(16.dp),
         ) {
             Row(
@@ -108,89 +108,71 @@ fun ScoreScreen(navController: NavHostController, gameViewModel: GameViewModel) 
 
             HorizontalDivider()
 
-            // Todo add filters
-
-            FlowRow(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = 16.dp),
-                horizontalArrangement = Arrangement.spacedBy(8.dp),
+            Column(
+                modifier = Modifier.fillMaxWidth()
+                    .padding(16.dp),
+                verticalArrangement = Arrangement.spacedBy(8.dp),
             ) {
-                FilterChip(
-                    selected = true,
-                    onClick = {
-                        // Inverser l'ordre de tri
-                        filter = filter.copy(dateOrderIsAscending = !filter.dateOrderIsAscending)
-                    },
-                    label = { Text("Date") },
-                    leadingIcon = {
-                        if (filter.dateOrderIsAscending) {
-                            Icon(
-                                imageVector = Icons.Filled.KeyboardArrowUp,
-                                contentDescription = "Tri Ascendant",
-                                modifier = Modifier.size(FilterChipDefaults.IconSize)
-                            )
-                        } else {
-                            Icon(
-                                imageVector = Icons.Filled.KeyboardArrowDown,
-                                contentDescription = "Tri Descendant",
-                                modifier = Modifier.size(FilterChipDefaults.IconSize)
+                Column(
+                    modifier = Modifier.fillMaxWidth(),
+                    verticalArrangement = Arrangement.spacedBy(4.dp),
+                ) {
+                    Text("Mode de jeu", fontSize = 16.sp)
+                    FlowRow(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.spacedBy(8.dp),
+                    ) {
+                        val gameModesLabels = context.resources.getStringArray(R.array.game_modes)
+                        filter.mode.entries.forEachIndexed { index, entry ->
+                            FilterChip(
+                                selected = entry.value,
+                                onClick = {
+                                    filter = filter.copy(mode = filter.mode.toMutableMap().apply {
+                                        this[entry.key] = !entry.value
+                                    })
+                                },
+
+                                leadingIcon = {
+                                    if (entry.value) {
+                                        Icon(
+                                            imageVector = Icons.Filled.Check,
+                                            contentDescription = "Filtre activé",
+                                            modifier = Modifier.size(FilterChipDefaults.IconSize)
+                                        )
+                                    }
+                                },
+
+                                label = { Text(
+                                    gameModesLabels[index],
+                                    maxLines = 1,
+                                ) },
                             )
                         }
-                    },
-                )
-
-                val gameModesLabels = context.resources.getStringArray(R.array.game_modes)
-                filter.mode.entries.forEachIndexed { index, entry ->
-                    FilterChip(
-                        selected = entry.value,
-                        onClick = {
-                            filter = filter.copy(mode = filter.mode.toMutableMap().apply {
-                                this[entry.key] = !entry.value
-                            })
-                        },
-
-                        leadingIcon = {
-                            if (entry.value) {
-                                Icon(
-                                    imageVector = Icons.Filled.Check,
-                                    contentDescription = "Filtre activé",
-                                    modifier = Modifier.size(FilterChipDefaults.IconSize)
-                                )
-                            }
-                        },
-
-                        label = { Text(
-                            gameModesLabels[index],
-                            maxLines = 1,
-                        ) },
-                    )
+                    }
                 }
 
-                // Filtrer par nombre de titres
-                FilterChip(
-                    selected = true,
-                    onClick = {
-                        // Inverser l'ordre de tri
-                        filter = filter.copy(nbTitleIsAscending = !filter.nbTitleIsAscending)
-                    },
-                    label = { Text("Nombre de titres") },
-                    leadingIcon = {
-                        if (filter.nbTitleIsAscending) {
-                            Icon(
-                                imageVector = Icons.Filled.KeyboardArrowUp,
-                                contentDescription = "Tri Ascendant",
-                                modifier = Modifier.size(FilterChipDefaults.IconSize)
-                            )
-                        } else {
-                            Icon(
-                                imageVector = Icons.Filled.KeyboardArrowDown,
-                                contentDescription = "Tri Descendant",
-                                modifier = Modifier.size(FilterChipDefaults.IconSize)
-                            )
-                        }
-                    },
-                )
+                Column(
+                    modifier = Modifier.fillMaxWidth(),
+                    verticalArrangement = Arrangement.spacedBy(4.dp),
+                ) {
+                    Text("Filtrer par", fontSize = 16.sp)
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.spacedBy(8.dp),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Text("Date")
+
+                        Switch(
+                            checked = filter.orderByNbTitle,
+                            onCheckedChange = {
+                                filter = filter.copy(orderByNbTitle = it)
+                            }
+                        )
+
+                        Text("Nombre de titres")
+                    }
+                }
             }
 
             if (filteredGames.isEmpty()) {

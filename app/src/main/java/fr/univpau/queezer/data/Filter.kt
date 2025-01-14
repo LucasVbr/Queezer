@@ -3,7 +3,8 @@ package fr.univpau.queezer.data
 import android.util.Log
 
 data class Filter(
-    var dateOrderIsAscending: Boolean = true,
+    // var dateOrderIsAscending: Boolean = true,
+    val orderByNbTitle : Boolean = false,
 
     val mode : Map<GameMode, Boolean> = mapOf(
         GameMode.TITLE to true,
@@ -11,7 +12,6 @@ data class Filter(
         GameMode.ALL to true
     ),
 
-    val nbTitleIsAscending : Boolean = true,
 )
 
 fun filterGames(filter: Filter, games: List<Game>): List<Game> {
@@ -19,14 +19,14 @@ fun filterGames(filter: Filter, games: List<Game>): List<Game> {
 
     return games
         .filter { game ->
-            // Filtrer uniquement par les modes de jeu activés
             filter.mode.filter { it.value }.keys.contains(game.settings.gameMode)
         }
         .sortedWith(compareBy<Game> { game ->
             // Tri par date
-            if (filter.dateOrderIsAscending) -game.date.time else game.date.time
-        }.thenBy { game ->
-            // Tri par nombre de titres
-            if (filter.nbTitleIsAscending) game.settings.numberOfTitles ?: 0 else -(game.settings.numberOfTitles ?: 0)
+            if (filter.orderByNbTitle) {
+                -game.settings.numberOfTitles!!
+            } else {
+                -game.date.time
+            }
         })
 }

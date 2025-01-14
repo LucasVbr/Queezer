@@ -46,6 +46,7 @@ import fr.univpau.queezer.data.Playlist
 import fr.univpau.queezer.manager.GameManager
 import fr.univpau.queezer.manager.fetchPlaylist
 import fr.univpau.queezer.service.DatabaseService
+import fr.univpau.queezer.view.components.TrackCardItemList
 import kotlinx.coroutines.CoroutineScope
 
 @Composable
@@ -258,17 +259,39 @@ fun LoadingScreen() {
 
 @Composable
 fun FinishScreen(gameManager: GameManager, context: Context, navController: NavHostController) {
-    Column(
-        modifier = Modifier.fillMaxSize(),
-        verticalArrangement = Arrangement.Center,
-        horizontalAlignment = Alignment.CenterHorizontally
-    ) {
-        Text("Partie terminée !", fontSize = 24.sp)
-        Text("Score : ${gameManager.score}", fontSize = 20.sp)
-        Button(onClick = {
-            gameManager.save(context)
-            gameManager.stop()
-            navController.popBackStack()
-        }) { Text(context.resources.getString(R.string.back)) }
+    Scaffold(
+        bottomBar = {
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(16.dp),
+                horizontalArrangement = Arrangement.SpaceBetween
+            ) {
+                Button(
+                    modifier = Modifier.fillMaxWidth(),
+                    onClick = {
+                    gameManager.save(context)
+                    gameManager.stop()
+                    navController.popBackStack()
+                }) { Text(context.resources.getString(R.string.back)) }
+            }
+        }
+    ) { innerPadding ->
+        Column(
+            modifier = Modifier.padding(innerPadding),
+            verticalArrangement = Arrangement.spacedBy(16.dp),
+        ) {
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(16.dp),
+                horizontalAlignment = Alignment.CenterHorizontally,
+            ){
+                Text("Partie terminée !", fontSize = 24.sp)
+                Text("Score : ${gameManager.score}", fontSize = 20.sp)
+
+                TrackCardItemList(gameManager.playlist.tracks)
+            }
+        }
     }
 }
