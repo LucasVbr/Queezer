@@ -41,9 +41,9 @@ import fr.univpau.queezer.manager.saveSettings
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun SettingsScreen(navController: NavHostController) {
+fun SettingsScreen(navController: NavHostController, saveLocation: String = "settings") {
     val context = LocalContext.current
-    val settings = remember { mutableStateOf(loadSettings(context)) }
+    val settings = remember { mutableStateOf(loadSettings(context, saveLocation)) }
 
     Scaffold(
         topBar = {
@@ -80,7 +80,7 @@ fun SettingsScreen(navController: NavHostController) {
                     onClick = {
                         try {
                             settings.value.validate(context)
-                            saveSettings(context, settings.value)
+                            saveSettings(context, settings.value, saveLocation)
                             navController.popBackStack()
                         } catch (e: Exception) {
                             Toast.makeText(context, e.message, Toast.LENGTH_LONG).show()
@@ -123,7 +123,7 @@ fun SettingsScreen(navController: NavHostController) {
                     keyboardOptions = KeyboardOptions.Default.copy(keyboardType = KeyboardType.Number),
                 )
 
-                Column (
+                Column(
                     modifier = Modifier.fillMaxWidth(),
                 ) {
                     Text(text = "Mode de jeu", fontSize = 18.sp)

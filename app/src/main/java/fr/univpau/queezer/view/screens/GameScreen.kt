@@ -1,6 +1,7 @@
 package fr.univpau.queezer.view.screens
 
 import android.content.Context
+import android.widget.Toast
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -39,7 +40,6 @@ import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
 import fr.univpau.queezer.R
 import fr.univpau.queezer.data.Settings
-import fr.univpau.queezer.manager.loadSettings
 import coil.compose.AsyncImage
 import fr.univpau.queezer.data.Answer
 import fr.univpau.queezer.data.Playlist
@@ -49,10 +49,9 @@ import fr.univpau.queezer.service.DatabaseService
 import kotlinx.coroutines.CoroutineScope
 
 @Composable
-fun GameScreen(navController: NavHostController, database: DatabaseService) {
-    val coroutineScope = rememberCoroutineScope()
+fun GameScreen(navController: NavHostController, settings: Settings, database: DatabaseService) {
     val context = LocalContext.current
-    val settings: Settings = loadSettings(context)
+    val coroutineScope = rememberCoroutineScope()
 
     var gameManager by remember { mutableStateOf(GameManager()) }
     var countdown by remember { mutableIntStateOf(30) }
@@ -62,6 +61,12 @@ fun GameScreen(navController: NavHostController, database: DatabaseService) {
 
     LaunchedEffect(settings.playlistUrl) {
         val playlist = fetchPlaylist(settings.playlistUrl)
+
+        if (settings.numberOfTitles!! > (playlist?.tracks?.size ?: 0)) {
+            navController.popBackStack()
+            Toast.makeText(context, context.resources.getString(R.string.playlist_too_short), Toast.LENGTH_SHORT).show()
+            return@LaunchedEffect;
+        }
 
         gameManager = GameManager(
             settings = settings,

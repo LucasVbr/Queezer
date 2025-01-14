@@ -62,7 +62,9 @@ fun HomeScreen(navController: NavHostController) {
         }
 
         Button(
-            onClick = { /* TODO: Partie personnalisée */ },
+            onClick = {
+                navController.navigate("custom_settings")
+            },
             shape = RoundedCornerShape(8.dp),
             modifier = Modifier
                 .fillMaxWidth()

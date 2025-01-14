@@ -35,5 +35,6 @@
     <string name="date">Date</string>
     <string name="error_playlist_not_found">La playlist n\'as pas été trouvée</string>
     <string name="error_tracks_count_too_high">Le nombre de titres et trop grand</string>
+    <string name="playlist_too_short">La playlist est trop petite pour le nombre de titres demandés</string>
 
 </resources>

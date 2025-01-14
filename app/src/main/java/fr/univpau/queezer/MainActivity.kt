@@ -4,9 +4,12 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.platform.LocalContext
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import fr.univpau.queezer.data.Settings
+import fr.univpau.queezer.manager.loadSettings
 import fr.univpau.queezer.view.screens.GameScreen
 import fr.univpau.queezer.view.screens.HomeScreen
 import fr.univpau.queezer.view.screens.ScoreScreen
@@ -32,7 +35,18 @@ fun QueezerApp(database: DatabaseService) {
 
     NavHost(navController = navController, startDestination = "home") {
         composable("home") { HomeScreen(navController) }
-        composable("game") { GameScreen(navController, database) }
+        composable("game") {
+            val context = LocalContext.current
+            val settings: Settings = loadSettings(context)
+            GameScreen(navController, settings, database)
+        }
+        composable("custom_settings") { SettingsScreen(navController, saveLocation = "custom_settings") }
+        composable("custom_game") {
+            val context = LocalContext.current
+            val settings: Settings = loadSettings(context, "custom_settings")
+            GameScreen(navController, settings, database)
+        }
+
         composable("settings") { SettingsScreen(navController) }
         composable("score") { ScoreScreen(navController, gameViewModel) }
     }
